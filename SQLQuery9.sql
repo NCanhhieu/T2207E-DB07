@@ -102,13 +102,13 @@ select A.Code, A.Name, E.Name  as authorname, C.Name as pubName, A.Price  from A
 --18. Viết Store Procedure:
 --SP_Them_Sach: thêm mới một cuốn sách
 create procedure SP_Them_Sach @Code varchar(20), @Name nvarchar(255),@Descrip ntext ,@CategoryID int 
-@Publishyear int, @NumberofPublish int , @Price Decimal(12,4),@Qty int
+@Publishyear int, @NumberofPublish int , @Price Decimal(12,4),@Qty int, @PublisherID int
  as
-insert into Asm6_Books(Code,Name,Descrip,CategoryID,Publishyear,NumberofPublish,Price,Qty )
-values(@Code,@Name,@Descrip,@CategoryID,@Publishyear,@NumberofPublish,@Price,@Qty)
+insert into Asm6_Books(Code,Name,Descrip,CategoryID,Publishyear,NumberofPublish,Price,Qty,PublisherID )
+values(@Code,@Name,@Descrip,@CategoryID,@Publishyear,@NumberofPublish,@Price,@Qty, @PublisherID)
 --SP_Tim_Sach: Tìm các cuốn sách theo từ khóa
 create procedure SP_Tim_Sach @Name nvarchar(255) as
-select * from Asm6_Books where Name like @Name;
+select * from Asm6_Books where Name like  N'%'+ @Name + N'%';
 --SP_Sach_ChuyenMuc: Liệt kê các cuốn sách theo mã chuyên mục
 create procedure SP_Sach_ChuyenMuc @CategoryID int as
 select * from Asm6_Books where CategoryID = @CategoryID
@@ -117,15 +117,13 @@ create trigger ko_xoa_san_pham
 on Asm6_Books
 after Delete 
 as 
-begin 
-if exists (select * from deleted where Code in (select BookID from Asm6_BookPublishs where Qty > 0))
+if exists (select * from deleted  where Qty > 0))
  rollback transaction;
-end;
---20. Viết trigger chỉ cho phép xóa một danh mục sách khi không còn cuốn sách nào thuộc chuyênmục này.create trigger ko_xoa_san_pham
+
+--20. Viết trigger chỉ cho phép xóa một danh mục sách khi không còn cuốn sách nào thuộc chuyênmục này.create trigger ko_xoa_danh_muc
 on Asm6_Categorys
 after Delete 
 as 
-begin 
-if exists (select * from deleted where Id in (select CategoryID from Asm6_Books))
+
+if exists (select * from deleted where Id in (select * from Asm6_Books))
  rollback transaction;
-end;
